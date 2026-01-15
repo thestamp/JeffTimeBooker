@@ -5,7 +5,7 @@
 
 const CONFIG = {
   ownerName: "Jeff",
-  ownerEmail: "j.lefebvre@uwinnipeg.ca",
+  ownerEmail: "",
   companyName: "The University of Winnipeg",
   timezone: "America/Chicago",
   rejectionIntensity: "normal", // "mild", "normal", "savage"
