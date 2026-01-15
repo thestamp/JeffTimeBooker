@@ -5,9 +5,9 @@
 
 const CONFIG = {
   ownerName: "Jeff",
-  ownerEmail: "jeff@example.com",
-  companyName: "The Schedule Defense Initiative",
-  timezone: "America/New_York",
+  ownerEmail: "j.lefebvre@uwinnipeg.ca",
+  companyName: "The University of Winnipeg",
+  timezone: "America/Chicago",
   rejectionIntensity: "normal", // "mild", "normal", "savage"
   
   // Processing delays (in milliseconds)
