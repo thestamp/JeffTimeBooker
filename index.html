@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book a Meeting - JeffTimeBooker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1A73E8;
+            --primary-hover: #1560c0;
+            --secondary: #5F6368;
+            --success: #34A853;
+            --error: #EA4335;
+            --warning: #FBBC04;
+            --light: #F8F9FA;
+            --lighter: #FFFFFF;
+            --text-dark: #202124;
+            --text-light: #5F6368;
+            --border: #DADCE0;
+            --shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            --shadow-lg: 0 10px 40px rgba(0,0,0,0.16);
+            --radius: 8px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-dark);
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--lighter);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, #1560c0 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .screen-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--text-dark);
+        }
+
+        .screen-subtitle {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        /* Welcome Screen */
+        .welcome-content {
+            text-align: center;
+        }
+
+        .welcome-content p {
+            font-size: 16px;
+            color: var(--text-light);
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .welcome-content .emoji {
+            font-size: 48px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        /* Calendar */
+        .calendar-container {
+            margin-bottom: 30px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-header button {
+            background: var(--light);
+            border: 1px solid var(--border);
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 18px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .calendar-header button:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .calendar-month {
+            font-size: 18px;
+            font-weight: 600;
+            flex: 1;
+            text-align: center;
+        }
+
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .weekday {
+            text-align: center;
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--text-light);
+            padding: 8px 0;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition);
+            background: var(--lighter);
+        }
+
+        .calendar-day:hover {
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .calendar-day.other-month {
+            color: #ccc;
+            cursor: default;
+        }
+
+        .calendar-day.other-month:hover {
+            border-color: var(--border);
+            background: var(--lighter);
+        }
+
+        .calendar-day.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            font-weight: 700;
+        }
+
+        .calendar-day.today {
+            border: 2px solid var(--primary);
+            font-weight: 700;
+        }
+
+        /* Time Slots */
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .time-slot {
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--lighter);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .time-slot:hover {
+            border-color: var(--primary);
+            background: var(--light);
+        }
+
+        .time-slot.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            font-weight: 700;
+        }
+
+        .time-slot.booked {
+            background: #f0f0f0;
+            color: var(--text-light);
+            border-color: var(--border);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .time-slot.booked::after {
+            content: " (Booked)";
+            font-size: 12px;
+        }
+
+        /* Form Styling */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-family: inherit;
+            transition: var(--transition);
+            background: var(--lighter);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .char-count {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        .char-count.warning {
+            color: var(--warning);
+        }
+
+        .char-count.error {
+            color: var(--error);
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--text-dark);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--light);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-tertiary {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-tertiary:hover {
+            background: rgba(26, 115, 232, 0.05);
+        }
+
+        /* Loading Animation */
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--light);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-container {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .loading-text {
+            margin-top: 16px;
+            font-size: 16px;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .loading-detail {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 8px;
+        }
+
+        /* Review Screen */
+        .review-box {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .review-item {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .review-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .review-label {
+            font-size: 12px;
+            color: var(--text-light);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .review-value {
+            font-size: 16px;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        /* Rejection Screen */
+        .rejection-box {
+            background: linear-gradient(135deg, rgba(234, 67, 53, 0.05) 0%, rgba(251, 188, 4, 0.05) 100%);
+            border-left: 4px solid var(--error);
+            padding: 20px;
+            border-radius: var(--radius);
+            margin-bottom: 24px;
+        }
+
+        .rejection-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .rejection-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--error);
+            margin-bottom: 8px;
+        }
+
+        .rejection-reason {
+            font-size: 14px;
+            color: var(--text-dark);
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .rejection-timestamp {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        /* AI Analysis Screen */
+        .ai-analysis-box {
+            background: linear-gradient(135deg, rgba(26, 115, 232, 0.05) 0%, rgba(52, 168, 83, 0.05) 100%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .ai-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .ai-logo {
+            font-size: 24px;
+            margin-right: 12px;
+        }
+
+        .ai-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .ai-subtitle {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .ai-metrics {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ai-metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        .ai-metric-label {
+            font-size: 12px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .ai-metric-value {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .ai-confidence {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .ai-confidence-score {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .ai-confidence-label {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        /* Contact Info */
+        .contact-info {
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .contact-info-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 16px;
+        }
+
+        .contact-item {
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .contact-item a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .contact-item a:hover {
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--light);
+            padding: 20px 30px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-light);
+            border-top: 1px solid var(--border);
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Collapsible Section */
+        .collapsible {
+            background: transparent;
+            border: 1px solid var(--border);
+            padding: 16px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            transition: var(--transition);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .collapsible:hover {
+            background: var(--light);
+            border-color: var(--primary);
+        }
+
+        .collapsible.active {
+            background: var(--light);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .collapsible-arrow {
+            transition: var(--transition);
+            font-size: 16px;
+        }
+
+        .collapsible.active .collapsible-arrow {
+            transform: rotate(180deg);
+        }
+
+        .collapsible-content {
+            display: none;
+            overflow: hidden;
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 var(--radius) var(--radius);
+            padding: 20px;
+            animation: slideDown 0.3s ease-in;
+        }
+
+        .collapsible-content.active {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 500px;
+            }
+        }
+
+        /* Success/Error Messages */
+        .error-message {
+            background: rgba(234, 67, 53, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+            padding: 12px;
+            border-radius: var(--radius);
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .info-message {
+            background: rgba(26, 115, 232, 0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 12px;
+            border-radius: var(--radius);
+            font-size: 12px;
+            margin-bottom: 16px;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .content {
+                padding: 24px 16px;
+            }
+
+            .header {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .time-slots {
+                grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            }
+
+            button {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+
+            .screen-title {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📅 Book a Meeting</h1>
+            <p>Schedule a time with <span id="ownerName">Jeff</span></p>
+        </div>
+
+        <div class="content">
+            <!-- Welcome Screen -->
+            <div id="screen-welcome" class="screen active">
+                <div class="welcome-content">
+                    <span class="emoji">🎯</span>
+                    <h2 class="screen-title">Ready to Meet?</h2>
+                    <p>Browse my calendar and select your preferred meeting time. Simple, transparent, and totally legitimate.</p>
+                    <button class="btn-primary" onclick="showScreen('screen-calendar')" style="width: 100%; margin-top: 24px;">
+                        Start Booking
+                    </button>
+                </div>
+            </div>
+
+            <!-- Calendar Selection Screen -->
+            <div id="screen-calendar" class="screen">
+                <h2 class="screen-title">Select a Date</h2>
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <button onclick="previousMonth()">&larr;</button>
+                        <div class="calendar-month">
+                            <span id="monthYear"></span>
+                        </div>
+                        <button onclick="nextMonth()">&rarr;</button>
+                    </div>
+
+                    <div class="weekdays">
+                        <div class="weekday">Sun</div>
+                        <div class="weekday">Mon</div>
+                        <div class="weekday">Tue</div>
+                        <div class="weekday">Wed</div>
+                        <div class="weekday">Thu</div>
+                        <div class="weekday">Fri</div>
+                        <div class="weekday">Sat</div>
+                    </div>
+
+                    <div class="calendar-grid" id="calendarGrid"></div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="showScreen('screen-welcome')">Back</button>
+                    <button class="btn-primary" id="btnSelectDate" onclick="selectDateAndProceed()" disabled>
+                        Next: Select Time
+                    </button>
+                </div>
+            </div>
+
+            <!-- Time Selection Screen -->
+            <div id="screen-time" class="screen">
+                <h2 class="screen-title">Select a Time</h2>
+                <div class="screen-subtitle" id="selectedDateDisplay"></div>
+
+                <div class="time-slots" id="timeSlotsContainer"></div>
+
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="showScreen('screen-calendar')">Back</button>
+                    <button class="btn-primary" id="btnSelectTime" onclick="selectTimeAndProceed()" disabled>
+                        Next: Your Information
+                    </button>
+                </div>
+            </div>
+
+            <!-- User Information Screen -->
+            <div id="screen-info" class="screen">
+                <h2 class="screen-title">Your Information</h2>
+
+                <div class="form-group">
+                    <label for="fullName">Full Name *</label>
+                    <input type="text" id="fullName" placeholder="John Doe" required>
+                    <div class="error-message" id="errorName" style="display: none;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" placeholder="john@example.com" required>
+                    <div class="error-message" id="errorEmail" style="display: none;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Phone Number (Optional)</label>
+                    <input type="tel" id="phone" placeholder="+1 (555) 123-4567">
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Meeting Description *</label>
+                    <textarea id="description" placeholder="What would you like to discuss?" required></textarea>
+                    <div class="char-count" id="descriptionCount">0 / 200 characters</div>
+                    <div class="error-message" id="errorDescription" style="display: none;"></div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="showScreen('screen-time')">Back</button>
+                    <button class="btn-primary" onclick="validateAndProceedToReview()">Review Booking</button>
+                </div>
+            </div>
+
+            <!-- Review Screen -->
+            <div id="screen-review" class="screen">
+                <h2 class="screen-title">Review Your Booking</h2>
+
+                <div class="review-box">
+                    <div class="review-item">
+                        <div class="review-label">Date & Time</div>
+                        <div class="review-value" id="reviewDateTime"></div>
+                    </div>
+                    <div class="review-item">
+                        <div class="review-label">Your Name</div>
+                        <div class="review-value" id="reviewName"></div>
+                    </div>
+                    <div class="review-item">
+                        <div class="review-label">Email</div>
+                        <div class="review-value" id="reviewEmail"></div>
+                    </div>
+                    <div class="review-item">
+                        <div class="review-label">Phone</div>
+                        <div class="review-value" id="reviewPhone"></div>
+                    </div>
+                    <div class="review-item">
+                        <div class="review-label">Description</div>
+                        <div class="review-value" id="reviewDescription"></div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="showScreen('screen-info')">Back</button>
+                    <button class="btn-primary" onclick="submitBooking()">Confirm Booking</button>
+                </div>
+            </div>
+
+            <!-- Processing Screen -->
+            <div id="screen-processing" class="screen">
+                <div class="loading-container">
+                    <div class="loader"></div>
+                    <div class="loading-text">Checking your availability...</div>
+                    <div class="loading-detail" id="processingDetail">Scanning 247 calendar entries</div>
+                </div>
+            </div>
+
+            <!-- Rejection Screen -->
+            <div id="screen-rejection" class="screen">
+                <h2 class="screen-title">Booking Status</h2>
+
+                <div class="rejection-box">
+                    <div class="rejection-icon">❌</div>
+                    <div class="rejection-title">Booking Rejected</div>
+                    <div class="rejection-reason" id="rejectionReason"></div>
+                    <div class="rejection-timestamp" id="rejectionTime"></div>
+                </div>
+
+                <p class="screen-subtitle">Unfortunately, this time doesn't work. But don't worry! You can submit an appeal for reconsideration.</p>
+
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="tryDifferentTime()">Try Different Time</button>
+                    <button class="btn-primary" onclick="showScreen('screen-appeal')">Submit an Appeal</button>
+                </div>
+            </div>
+
+            <!-- Appeal Form Screen -->
+            <div id="screen-appeal" class="screen">
+                <h2 class="screen-title">Submit an Appeal</h2>
+                <p class="screen-subtitle">Help us understand why this time is important to you.</p>
+
+                <div class="form-group">
+                    <label for="appealReason">Why is this time important? *</label>
+                    <textarea id="appealReason" placeholder="Please explain your situation..." required></textarea>
+                    <div class="char-count" id="appealReasonCount">0 / 500 characters</div>
+                    <div class="error-message" id="errorAppealReason" style="display: none;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="appealUrgency">Urgency Level *</label>
+                    <select id="appealUrgency" required>
+                        <option value="">Select urgency level...</option>
+                        <option value="low">Low - Flexible timing</option>
+                        <option value="medium">Medium - Important but flexible</option>
+                        <option value="high">High - Time-sensitive</option>
+                        <option value="critical">Critical - Urgent matter</option>
+                    </select>
+                    <div class="error-message" id="errorAppealUrgency" style="display: none;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="appealContext">Additional Context (Optional)</label>
+                    <textarea id="appealContext" placeholder="Any other details..."></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="showScreen('screen-rejection')">Back</button>
+                    <button class="btn-primary" onclick="validateAndSubmitAppeal()">Submit Appeal</button>
+                </div>
+            </div>
+
+            <!-- AI Analysis Screen -->
+            <div id="screen-ai-analysis" class="screen">
+                <div class="loading-container">
+                    <div style="margin-top: 20px;">
+                        <div class="ai-header">
+                            <div class="ai-logo">🤖</div>
+                            <div>
+                                <div class="ai-title">AI Analysis in Progress</div>
+                                <div class="ai-subtitle">OpenAI GPT-4 Processing Request</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 30px;">
+                            <div class="loader" style="margin: 0 auto;"></div>
+                        </div>
+                        <div class="loading-text" style="margin-top: 20px;">Analyzing your appeal...</div>
+                        <div class="ai-metrics" style="margin-top: 20px;">
+                            <div class="ai-metric">
+                                <span class="ai-metric-label">Sentiment Analysis</span>
+                                <span class="ai-metric-value" id="sentimentValue">--</span>
+                            </div>
+                            <div class="ai-metric">
+                                <span class="ai-metric-label">Priority Assessment</span>
+                                <span class="ai-metric-value" id="priorityValue">--</span>
+                            </div>
+                            <div class="ai-metric">
+                                <span class="ai-metric-label">Schedule Urgency</span>
+                                <span class="ai-metric-value" id="urgencyValue">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Final Rejection Screen -->
+            <div id="screen-final-rejection" class="screen">
+                <h2 class="screen-title">Appeal Analysis Complete</h2>
+
+                <div class="ai-analysis-box">
+                    <div class="ai-header">
+                        <div class="ai-logo">🤖</div>
+                        <div>
+                            <div class="ai-title">AI Analysis Result</div>
+                            <div class="ai-subtitle">Decision: REJECTED</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+                        <div class="screen-subtitle" id="aiAnalysisResult"></div>
+
+                        <div class="ai-confidence">
+                            <div class="ai-confidence-score" id="confidenceScore">99%</div>
+                            <div class="ai-confidence-label">Confidence Score</div>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="screen-subtitle">
+                    While your appeal was thoughtfully considered, the analysis confirms that this time slot is unavailable.
+                </p>
+
+                <button class="btn-primary" id="emailMeetingDetailsButton" onclick="openEmailClient()" style="width: 100%; margin-bottom: 24px;">
+                    📨 Send Your Meeting Details via Email
+                </button>
+
+                <!-- Collapsible Additional Details -->
+                <button class="collapsible" onclick="toggleCollapsible(event)">
+                    <span>Additional Details</span>
+                    <span class="collapsible-arrow">▼</span>
+                </button>
+                <div class="collapsible-content">
+                    <p class="screen-subtitle" style="margin-bottom: 20px; color: var(--primary); font-weight: 600;">
+                        🎉 Surprise! This was all a joke!
+                    </p>
+                    <p class="screen-subtitle" style="margin-bottom: 20px;">
+                        Your meeting request is sincere. The email above will get to me directly—go ahead and send it so we can actually meet up! 
+                    </p>
+                    <p class="screen-subtitle" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-light);">
+                        <em>P.S. If you liked this prank, you can <a href="https://github.com/thestamp/JeffTimeBooker" target="_blank" style="color: var(--primary);">create your own version on GitHub</a> to mess with your coworkers.</em>
+                    </p>
+                </div>
+
+                <div class="button-group" style="margin-top: 24px;">
+                    <button class="btn-primary" onclick="openAdditionalDetails()" style="flex: 1;">Try Again</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            © 2026 JeffTimeBooker
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        // ========== State Management ==========
+        let appState = {
+            currentScreen: 'screen-welcome',
+            selectedDate: null,
+            selectedTime: null,
+            userInfo: {
+                fullName: '',
+                email: '',
+                phone: '',
+                description: ''
+            },
+            appealInfo: {
+                reason: '',
+                urgency: '',
+                context: ''
+            },
+            currentMonth: new Date(),
+            rejectionReason: '',
+            aiAnalysis: ''
+        };
+
+        // ========== Screen Navigation ==========
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+            appState.currentScreen = screenId;
+            window.scrollTo(0, 0);
+        }
+
+        // ========== Calendar Functions ==========
+        function initializeCalendar() {
+            renderCalendar();
+            updateMonthYear();
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            const year = appState.currentMonth.getFullYear();
+            const month = appState.currentMonth.getMonth();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            for (let i = 0; i < 42; i++) {
+                const date = new Date(startDate);
+                date.setDate(date.getDate() + i);
+
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = date.getDate();
+
+                const isToday = date.getTime() === today.getTime();
+                const isInPast = date < today;
+                const isCurrentMonth = date.getMonth() === month;
+
+                if (!isCurrentMonth) {
+                    dayElement.classList.add('other-month');
+                } else if (isInPast) {
+                    dayElement.classList.add('other-month');
+                    dayElement.style.opacity = '0.4';
+                    dayElement.style.cursor = 'not-allowed';
+                } else {
+                    if (isToday) {
+                        dayElement.classList.add('today');
+                    }
+
+                    if (appState.selectedDate && 
+                        date.toDateString() === appState.selectedDate.toDateString()) {
+                        dayElement.classList.add('selected');
+                    }
+
+                    dayElement.onclick = () => selectDate(date);
+                }
+
+                grid.appendChild(dayElement);
+            }
+        }
+
+        function updateMonthYear() {
+            const options = { month: 'long', year: 'numeric' };
+            document.getElementById('monthYear').textContent = 
+                appState.currentMonth.toLocaleDateString('en-US', options);
+        }
+
+        function previousMonth() {
+            appState.currentMonth.setMonth(appState.currentMonth.getMonth() - 1);
+            renderCalendar();
+            updateMonthYear();
+        }
+
+        function nextMonth() {
+            appState.currentMonth.setMonth(appState.currentMonth.getMonth() + 1);
+            renderCalendar();
+            updateMonthYear();
+        }
+
+        function selectDate(date) {
+            appState.selectedDate = new Date(date);
+            renderCalendar();
+            document.getElementById('btnSelectDate').disabled = false;
+        }
+
+        function selectDateAndProceed() {
+            if (!appState.selectedDate) return;
+
+            const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+            const dateStr = appState.selectedDate.toLocaleDateString('en-US', options);
+            document.getElementById('selectedDateDisplay').textContent = `You selected ${dateStr}`;
+
+            renderTimeSlots();
+            showScreen('screen-time');
+        }
+
+        // ========== Time Slot Functions ==========
+        function renderTimeSlots() {
+            const container = document.getElementById('timeSlotsContainer');
+            container.innerHTML = '';
+
+            // Get booked time indices for this date (deterministic)
+            const bookedIndices = getBookedTimeSlotsForDate(appState.selectedDate);
+
+            // Generate time slots from 9 AM to 5 PM, 1-hour intervals
+            for (let hour = 9; hour <= 16; hour++) {
+                const timeSlot = document.createElement('button');
+                timeSlot.className = 'time-slot';
+                const timeLabel = `${hour % 12 || 12}:00 ${hour < 12 ? 'AM' : 'PM'}`;
+                timeSlot.textContent = timeLabel;
+
+                const slotIndex = hour - 9; // 0-7 index
+                const isBooked = bookedIndices.includes(slotIndex);
+
+                if (isBooked) {
+                    timeSlot.classList.add('booked');
+                    timeSlot.disabled = true;
+                } else if (appState.selectedTime === timeLabel) {
+                    timeSlot.classList.add('selected');
+                    timeSlot.onclick = () => selectTime(timeLabel);
+                } else {
+                    timeSlot.onclick = () => selectTime(timeLabel);
+                }
+
+                container.appendChild(timeSlot);
+            }
+        }
+
+        // Deterministic hash function to generate consistent booked slots for a date
+        function getBookedTimeSlotsForDate(date) {
+            // Create a hash from the date string
+            const dateStr = date.toDateString();
+            let hash = 0;
+            for (let i = 0; i < dateStr.length; i++) {
+                const char = dateStr.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32-bit integer
+            }
+
+            // Use hash to deterministically select 2-3 booked slots out of 8
+            const numBooked = Math.abs(hash % 3) + 2; // 2-4 booked slots
+            const bookedIndices = [];
+            const maxSlots = 8;
+
+            for (let i = 0; i < numBooked; i++) {
+                const slotIndex = Math.abs((hash + i * 12345) % maxSlots);
+                if (!bookedIndices.includes(slotIndex)) {
+                    bookedIndices.push(slotIndex);
+                }
+            }
+
+            return bookedIndices.sort((a, b) => a - b);
+        }
+
+        function selectTime(time) {
+            appState.selectedTime = time;
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                if (slot.textContent.trim().startsWith(time.split(' ')[0])) {
+                    slot.classList.add('selected');
+                } else {
+                    slot.classList.remove('selected');
+                }
+            });
+            document.getElementById('btnSelectTime').disabled = false;
+        }
+
+        function selectTimeAndProceed() {
+            if (!appState.selectedTime) return;
+            showScreen('screen-info');
+        }
+
+        // ========== Form Functions ==========
+        function setupFormListeners() {
+            const descInput = document.getElementById('description');
+            descInput.addEventListener('input', updateCharCount);
+
+            const appealInput = document.getElementById('appealReason');
+            appealInput.addEventListener('input', updateAppealCharCount);
+        }
+
+        function updateCharCount() {
+            const input = document.getElementById('description');
+            const count = input.value.length;
+            const maxCount = 200;
+            const countElement = document.getElementById('descriptionCount');
+            countElement.textContent = `${count} / ${maxCount} characters`;
+
+            if (count < 10) {
+                countElement.classList.add('error');
+                countElement.classList.remove('warning');
+            } else if (count >= 180) {
+                countElement.classList.add('warning');
+                countElement.classList.remove('error');
+            } else {
+                countElement.classList.remove('warning', 'error');
+            }
+        }
+
+        function updateAppealCharCount() {
+            const input = document.getElementById('appealReason');
+            const count = input.value.length;
+            const maxCount = 500;
+            const countElement = document.getElementById('appealReasonCount');
+            countElement.textContent = `${count} / ${maxCount} characters`;
+
+            if (count < 20) {
+                countElement.classList.add('error');
+                countElement.classList.remove('warning');
+            } else if (count >= 450) {
+                countElement.classList.add('warning');
+                countElement.classList.remove('error');
+            } else {
+                countElement.classList.remove('warning', 'error');
+            }
+        }
+
+        function validateAndProceedToReview() {
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const description = document.getElementById('description').value.trim();
+
+            let isValid = true;
+
+            // Validate name
+            if (!fullName || fullName.length < 2) {
+                document.getElementById('errorName').textContent = 'Please enter a valid name';
+                document.getElementById('errorName').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('errorName').style.display = 'none';
+            }
+
+            // Validate email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email || !emailRegex.test(email)) {
+                document.getElementById('errorEmail').textContent = 'Please enter a valid email';
+                document.getElementById('errorEmail').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('errorEmail').style.display = 'none';
+            }
+
+            // Validate description
+            if (description.length < 10 || description.length > 200) {
+                document.getElementById('errorDescription').textContent = 'Description must be 10-200 characters';
+                document.getElementById('errorDescription').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('errorDescription').style.display = 'none';
+            }
+
+            if (!isValid) return;
+
+            // Store user info
+            appState.userInfo.fullName = fullName;
+            appState.userInfo.email = email;
+            appState.userInfo.phone = document.getElementById('phone').value.trim();
+            appState.userInfo.description = description;
+
+            // Show review screen
+            const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+            const dateStr = appState.selectedDate.toLocaleDateString('en-US', options);
+            document.getElementById('reviewDateTime').textContent = `${dateStr} at ${appState.selectedTime}`;
+            document.getElementById('reviewName').textContent = fullName;
+            document.getElementById('reviewEmail').textContent = email;
+            document.getElementById('reviewPhone').textContent = appState.userInfo.phone || '(Not provided)';
+            document.getElementById('reviewDescription').textContent = description;
+
+            showScreen('screen-review');
+        }
+
+        function submitBooking() {
+            showScreen('screen-processing');
+            
+            const randomDetail = CONFIG.processingDetails[Math.floor(Math.random() * CONFIG.processingDetails.length)];
+            document.getElementById('processingDetail').textContent = randomDetail;
+
+            setTimeout(() => {
+                rejectBooking();
+            }, CONFIG.bookingProcessingDelay);
+        }
+
+        // ========== Rejection Functions ==========
+        function rejectBooking() {
+            appState.rejectionReason = CONFIG.rejectionReasons[Math.floor(Math.random() * CONFIG.rejectionReasons.length)];
+
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+            });
+
+            document.getElementById('rejectionReason').textContent = appState.rejectionReason;
+            document.getElementById('rejectionTime').textContent = `Rejection timestamp: ${now.toLocaleDateString()} at ${timeStr}`;
+
+            showScreen('screen-rejection');
+        }
+
+        // ========== Appeal Functions ==========
+        function validateAndSubmitAppeal() {
+            const reason = document.getElementById('appealReason').value.trim();
+            const urgency = document.getElementById('appealUrgency').value;
+
+            let isValid = true;
+
+            if (reason.length < 20 || reason.length > 500) {
+                document.getElementById('errorAppealReason').textContent = 'Appeal reason must be 20-500 characters';
+                document.getElementById('errorAppealReason').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('errorAppealReason').style.display = 'none';
+            }
+
+            if (!urgency) {
+                document.getElementById('errorAppealUrgency').textContent = 'Please select an urgency level';
+                document.getElementById('errorAppealUrgency').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('errorAppealUrgency').style.display = 'none';
+            }
+
+            if (!isValid) {
+                console.log('Appeal validation failed. Reason length:', reason.length, 'Urgency:', urgency);
+                return;
+            }
+
+            appState.appealInfo.reason = reason;
+            appState.appealInfo.urgency = urgency;
+            appState.appealInfo.context = document.getElementById('appealContext').value.trim();
+
+            showScreen('screen-ai-analysis');
+            simulateAIAnalysis();
+        }
+
+        function simulateAIAnalysis() {
+            // Simulate updating metrics
+            let sentiment = 0;
+            let priority = 0;
+            let urgency = 0;
+
+            const interval = setInterval(() => {
+                sentiment = Math.min(100, sentiment + Math.random() * 30);
+                priority = Math.min(100, priority + Math.random() * 25);
+                urgency = Math.min(100, urgency + Math.random() * 20);
+
+                document.getElementById('sentimentValue').textContent = Math.round(sentiment) + '%';
+                document.getElementById('priorityValue').textContent = Math.round(priority) + '%th percentile';
+                
+                const urgencyLevels = ['LOW', 'MODERATE', 'HIGH', 'CRITICAL'];
+                document.getElementById('urgencyValue').textContent = urgencyLevels[Math.floor(urgency / 25)];
+
+                if (sentiment >= 100 && priority >= 100 && urgency >= 100) {
+                    clearInterval(interval);
+                }
+            }, 300);
+
+            setTimeout(() => {
+                clearInterval(interval);
+                showAIAnalysisResult();
+            }, CONFIG.aiAnalysisDelay);
+        }
+
+        function showAIAnalysisResult() {
+            appState.aiAnalysis = CONFIG.aiAnalysisResults[Math.floor(Math.random() * CONFIG.aiAnalysisResults.length)];
+
+            const confidenceScore = CONFIG.confidenceScores[Math.floor(Math.random() * CONFIG.confidenceScores.length)];
+
+            document.getElementById('aiAnalysisResult').textContent = appState.aiAnalysis;
+            document.getElementById('confidenceScore').textContent = confidenceScore;
+
+            showScreen('screen-final-rejection');
+        }
+
+        // ========== Email Meeting Details ==========
+        function openEmailClient() {
+            const options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+            const dateStr = appState.selectedDate.toLocaleDateString('en-US', options);
+
+            const emailSubject = `Meeting Request: ${appState.userInfo.fullName}`;
+            const emailBody = `Meeting Details Submission
+
+Name: ${appState.userInfo.fullName}
+Email: ${appState.userInfo.email}
+Phone: ${appState.userInfo.phone || '(Not provided)'}
+
+Requested Date & Time: ${dateStr} at ${appState.selectedTime}
+
+Meeting Description:
+${appState.userInfo.description}
+
+Appeal Reason:
+${appState.appealInfo.reason}
+
+Urgency Level: ${appState.appealInfo.urgency}
+
+Additional Context:
+${appState.appealInfo.context || '(None provided)'}
+
+---
+Please respond to this email to discuss alternative meeting times.`;
+
+            const mailtoLink = `mailto:${CONFIG.ownerEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+            window.location.href = mailtoLink;
+        }
+
+        function toggleCollapsible(event) {
+            const collapsible = event.target.closest('.collapsible');
+            collapsible.classList.toggle('active');
+            collapsible.nextElementSibling.classList.toggle('active');
+            
+            // Hide the Try Again button when collapsible opens
+            const buttonGroup = collapsible.parentElement.querySelector('.button-group');
+            if (buttonGroup) {
+                buttonGroup.style.display = collapsible.classList.contains('active') ? 'none' : 'flex';
+            }
+        }
+
+        function openAdditionalDetails() {
+            const collapsible = document.querySelector('.collapsible');
+            const content = collapsible.nextElementSibling;
+            
+            if (!collapsible.classList.contains('active')) {
+                collapsible.classList.add('active');
+                content.classList.add('active');
+            }
+        }
+
+        // ========== Reset Function ==========
+        function resetBooking() {
+            appState.selectedDate = null;
+            appState.selectedTime = null;
+            appState.userInfo = { fullName: '', email: '', phone: '', description: '' };
+            appState.appealInfo = { reason: '', urgency: '', context: '' };
+            appState.currentMonth = new Date();
+
+            document.getElementById('fullName').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('phone').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('appealReason').value = '';
+            document.getElementById('appealUrgency').value = '';
+            document.getElementById('appealContext').value = '';
+
+            document.getElementById('btnSelectDate').disabled = true;
+            document.getElementById('btnSelectTime').disabled = true;
+
+            renderCalendar();
+            updateMonthYear();
+            showScreen('screen-welcome');
+        }
+
+        function tryDifferentTime() {
+            // Reset date and time selection but keep user info
+            appState.selectedDate = null;
+            appState.selectedTime = null;
+            appState.currentMonth = new Date();
+
+            document.getElementById('btnSelectDate').disabled = true;
+            document.getElementById('btnSelectTime').disabled = true;
+
+            renderCalendar();
+            updateMonthYear();
+            showScreen('screen-calendar');
+        }
+
+        // ========== Reset Function ==========
+        function setupConfiguration() {
+            document.getElementById('ownerName').textContent = CONFIG.ownerName;
+        }
+
+        // ========== Initialization ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            setupConfiguration();
+            initializeCalendar();
+            setupFormListeners();
+        });
+    </script>
+</body>
+</html>
